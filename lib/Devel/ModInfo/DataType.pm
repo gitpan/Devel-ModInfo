@@ -15,7 +15,8 @@ use warnings;
 our @ISA = ('Exporter');
 our @EXPORT_OK = qw( String2DataType );
 
-our $VERSION = '0.06';
+# MODINFO version 2.00
+our $VERSION = '2.00';
 
 # MODINFO function SCALAR
 # MODINFO retval STRING

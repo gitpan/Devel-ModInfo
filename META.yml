@@ -18,6 +18,8 @@ no_index:
   directory:
     - t
     - inc
+  package:
+    - MyModule
 requires:
   Data::Dumper: 0
   Exporter: 0
@@ -31,4 +33,4 @@ requires:
   warnings: 0
 resources:
   repository: git://github.com/neilbowers/Devel-ModInfo.git
-version: 0.06
+version: 2.00

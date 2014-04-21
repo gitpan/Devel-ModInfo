@@ -63,6 +63,9 @@ WriteMakefile(
     ($mm_ver <= 6.45
         ? ()
         : (META_MERGE => {
+            no_index => {
+                package => ['MyModule'],
+            },
             'meta-spec' => { version => 2 },
             resources => {
                 repository  => {

@@ -17,6 +17,9 @@
       "directory" : [
          "t",
          "inc"
+      ],
+      "package" : [
+         "MyModule"
       ]
    },
    "prereqs" : {
@@ -58,5 +61,5 @@
          "web" : "https://github.com/neilbowers/Devel-ModInfo"
       }
    },
-   "version" : "0.06"
+   "version" : "2.00"
 }
