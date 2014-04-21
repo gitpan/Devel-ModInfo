@@ -12,8 +12,8 @@ require Exporter;
 our @ISA    = qw(Exporter);
 our @EXPORT = qw();
 
-# MODINFO version 2.00
-our $VERSION = '2.00';
+# MODINFO version 2.01
+our $VERSION = '2.01';
 
 
 # Preloaded methods go here.

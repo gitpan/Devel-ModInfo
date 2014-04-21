@@ -61,8 +61,8 @@ require Exporter;
 our @ISA    = qw(Exporter AutoLoader);
 our @EXPORT = qw();
 
-# MODINFO version 2.00
-our $VERSION = '2.00';
+# MODINFO version 2.01
+our $VERSION = '2.01';
 
 
 # Preloaded methods go here.
@@ -416,7 +416,7 @@ object with the class name of the desired module.
 
 =head1 INTERFACE
 
-=begin ModInfo interface
+=begin ModInfo
 
 =head2 Parent Classes
 
@@ -511,7 +511,7 @@ Returns the path to an icon for this module (relative to the module file itself)
 =back
 
 
-=end ModInfo interface
+=end ModInfo
 
 
 =head1 KNOWN ISSUES

@@ -1,5 +1,9 @@
 Revision history for Perl module Devel::ModInfo
 
+2.01 2014-04-21 NEILB
+    - Needed to install a new version of Pod::Checker to find the pod error
+      that MetaCPAN was griping about :-(
+
 2.00 2014-04-21 NEILB
     - Had to bump the version number because some of the sub-modules
       previously had a version number 1.3
