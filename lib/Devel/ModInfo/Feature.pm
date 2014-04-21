@@ -10,17 +10,17 @@ package Devel::ModInfo::Feature;
 
 # MODINFO dependency module strict
 use strict;
-# MODINFO dependency module vars
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
+# MODINFO dependency module warnings
+use warnings;
 
 # MODINFO dependency module Exporter
 require Exporter;
 
-# MODINFO parent_class AutoLoader
-@ISA = qw(Exporter AutoLoader);
-@EXPORT = qw();
-# MODINFO version 0.01
-($VERSION) = ' $Revision: 1.3 $ ' =~ /\$Revision:\s+([^\s]+)/;
+our @ISA    = qw(Exporter);
+our @EXPORT = qw();
+
+# MODINFO version 0.06
+our $VERSION = '0.06';
 
 
 # Preloaded methods go here.

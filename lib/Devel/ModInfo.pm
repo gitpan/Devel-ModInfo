@@ -13,6 +13,8 @@ $| = 1;
 
 # MODINFO module Devel::ModInfo
 package Devel::ModInfo;
+
+use 5.006;
 # MODINFO dependency module File::Spec::Functions
 use File::Spec::Functions;
 # MODINFO dependency module XML::DOM
@@ -22,8 +24,8 @@ use Data::Dumper;
 
 # MODINFO dependency module strict
 use strict;
-# MODINFO dependency module vars
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
+# MODINFO dependency module warnings
+use warnings;
 
 # MODINFO dependency module Devel::ModInfo::Method
 use Devel::ModInfo::Method;
@@ -56,10 +58,11 @@ use Devel::ModInfo::DataType 'String2DataType';
 require Exporter;
 
 # MODINFO parent_class AutoLoader
-@ISA = qw(Exporter AutoLoader);
-@EXPORT = qw();
-# MODINFO version 0.05
-$VERSION = '0.05';
+our @ISA    = qw(Exporter AutoLoader);
+our @EXPORT = qw();
+
+# MODINFO version 0.06
+our $VERSION = '0.06';
 
 
 # Preloaded methods go here.
@@ -78,7 +81,7 @@ sub new{
 	if ($mod_info_file eq '') {
 		die "Couldn't locate mfo file for $module in @INC path";
 	}
-	my $parser = new XML::DOM::Parser();
+	my $parser = XML::DOM::Parser->new();
 	my $xml_doc;
 	eval {
 	    $xml_doc = $parser->parsefile($mod_info_file);
@@ -94,7 +97,9 @@ sub new{
 	#Get methods
 	#
 	foreach my $item ($xml_doc->getElementsByTagName('method')) {		
-		my $item_obj = new Devel::ModInfo::Method(_extract_function_data($item, $class));
+		my $item_obj = Devel::ModInfo::Method->new(
+                           _extract_function_data($item, $class)
+                       );
 		push(@methods, $item_obj);
 	}
 
@@ -102,7 +107,7 @@ sub new{
 	#Get constructors
 	#
 	foreach my $item ($xml_doc->getElementsByTagName('constructor')) {		
-		my $item_obj = new Devel::ModInfo::Constructor(_extract_function_data($item, $class));
+		my $item_obj = Devel::ModInfo::Constructor->new(_extract_function_data($item, $class));
 		push(@constructors, $item_obj);
 	}
 
@@ -110,7 +115,7 @@ sub new{
 	#Get functions
 	#
 	foreach my $item ($xml_doc->getElementsByTagName('function')) {		
-		my $item_obj = new Devel::ModInfo::Function(_extract_function_data($item, $class));
+		my $item_obj = Devel::ModInfo::Function->new(_extract_function_data($item, $class));
 		push(@functions, $item_obj);
 	}
 
@@ -118,7 +123,7 @@ sub new{
 	#Get properties
 	#
 	foreach my $item ($xml_doc->getElementsByTagName('property')) {		
-		my $item_obj = new Devel::ModInfo::Property(
+		my $item_obj = Devel::ModInfo::Property->new(
 			name 				=> $item->getAttribute('name'),
 			display_name 		=> $item->getAttribute('display_name'),
 			short_description	=> $item->getAttribute('short_description'),
@@ -139,7 +144,7 @@ sub new{
 
 	my @deps;
 	foreach my $dep_node ($mod_node->getElementsByTagName('dependency')) {
-		my $dep_obj = new Devel::ModInfo::Dependency(
+		my $dep_obj = Devel::ModInfo::Dependency->new(
 			type 	=> $dep_node->getAttribute('type'),
 			target 	=> $dep_node->getAttribute('target'),
 		);
@@ -148,14 +153,14 @@ sub new{
 
 	my @parents;
 	foreach my $parent ($mod_node->getElementsByTagName('parent_class')) {
-		my $parent_obj = new Devel::ModInfo::ParentClass(
+		my $parent_obj = Devel::ModInfo::ParentClass->new(
 			name 	=> $parent->getAttribute('name'),
 		);
 		push(@parents, $parent_obj);
 	}
 
 
-	my $mod_obj = new Devel::ModInfo::Module(
+	my $mod_obj = Devel::ModInfo::Module->new(
 		name 				=> $mod_node->getAttribute('name'),
 		display_name 		=> $mod_node->getAttribute('display_name'),
 		short_description	=> $mod_node->getAttribute('short_description'),
@@ -267,7 +272,7 @@ sub _extract_function_data {
 		my $short_description = $param->getAttribute('short_description');
 		my $display_name = $param->getAttribute('display_name');
 		
-		my $param_obj = new Devel::ModInfo::Parameter(
+		my $param_obj = Devel::ModInfo::Parameter->new(
 			name				=> $name,
 			display_name		=> $display_name,
 			data_type			=> $data_type,
@@ -295,7 +300,7 @@ sub _extract_function_data {
 			my $data_type = _get_datatype(class_name=>$class, data_type=>$key->getAttribute('data_type'));
 			my $short_description = $key->getAttribute('short_description');
 			my $display_name = $key->getAttribute('display_name');
-			my $key_obj = new Devel::ModInfo::ParamHash::Key(
+			my $key_obj = Devel::ModInfo::ParamHash::Key->new(
 				name				=> $name,
 				display_name		=> $display_name,
 				data_type			=> $data_type,
@@ -306,7 +311,7 @@ sub _extract_function_data {
 		}
 		my $param_hash_obj;
 		if ($data_type eq 'paramhash') {
-		    $param_hash_obj = new Devel::ModInfo::ParamHash(
+		    $param_hash_obj = Devel::ModInfo::ParamHash->new(
 			name				=> $name,
 			display_name		=> $display_name,
 			data_type			=> $data_type,
@@ -315,7 +320,7 @@ sub _extract_function_data {
 		       );	
 		}
 		else {
-		    $param_hash_obj = new Devel::ModInfo::ParamHashRef(
+		    $param_hash_obj = Devel::ModInfo::ParamHashRef->new(
 			name				=> $name,
 			display_name		=> $display_name,
 			data_type			=> $data_type,
@@ -337,7 +342,7 @@ sub _extract_function_data {
 		my $short_description = $param_array->getAttribute('short_description');
 		my $display_name = $param_array->getAttribute('display_name');
 		
-		my $param_array_obj = new Devel::ModInfo::ParamArray(
+		my $param_array_obj = Devel::ModInfo::ParamArray->new(
 			name				=> $name,
 			display_name		=> $display_name,
 			data_type			=> $data_type,
@@ -382,31 +387,32 @@ sub _get_datatype {
 1;
 __END__
 
-=head1 ModInfo
+=head1 NAME
 
-ModInfo - Perl extension for providing metadata about a module's methods, properties, and
- arguments
+Devel::ModInfo - provides metadata about a module's methods, properties, and arguments
 
 =head1 SYNOPSIS
 
   use ModInfo;
-  my $mi = new ModInfo('Data::Dumper');
+  my $mi        = Devel::ModInfo->new('Data::Dumper');
   my @functions = $mi->function_descriptors();
   my (@methods, @properties);
   if ($mi->is_oo) {
-	  @methods = $mi->method_descriptors;
+	  @methods    = $mi->method_descriptors;
       @properties = $mi->property_descriptors();
   }
 
 =head1 DESCRIPTION
 
-ModInfo will use a previously created XML file (with the extension .mfo) to generate 
+Devel::ModInfo will use a previously created XML file
+(with the extension .mfo) to generate 
 a data structure that describes the interface for a Perl module.
 
-The ModInfo system is made up of several object-oriented modules which are all used 
-exclusively by the ModInfo module.  This means that the developer should only ever 
-need to directly instantiate the ModInfo object with the class name of the desired 
-module.
+The Devel::ModInfo system is made up of several object-oriented modules
+which are all used exclusively by the ModInfo module.
+This means that the developer should only ever 
+need to directly instantiate the Devel::ModInfo
+object with the class name of the desired module.
 
 =head1 INTERFACE
 
@@ -416,86 +422,45 @@ module.
 
 =over 4
 
-
 =item * AutoLoader
 
 =back
 
 
-
-
-
 =head2 Constructors
 
-
-
 =over 4
-
-
 
 =item * sub new returns [VOID]
-
-=over 4
 
 =item *	module as STRING
 
 =back
 
 
-
-
-
-=back
-
-
-
-
-
-
-
 =head2 Functions
-
-
 
 =over 4
 
-
-
 =item * sub properties returns [ARRAYREF]
-
-
-
 
 =item * sub methods returns [ARRAYREF]
 
-
-
-
 =item * sub functions returns [ARRAYREF]
 
-
-
-
 =item * sub constructors returns [ARRAYREF]
-
-
-
 
 =item * sub module returns [Devel::ModInfo::Module]
 
 Returns the Module object for this Package
 
-
 =item * sub is_oo returns [INTEGER]
 
 Returns 1 if this is an object-oriented package, 0 if not
 
-
 =item * sub icon returns [STRING]
 
 Returns the path to an icon for this module (relative to the module file itself)
-
-
 
 =back
 
@@ -505,6 +470,7 @@ Returns the path to an icon for this module (relative to the module file itself)
 
 =head2 Dependencies
 
+=over 4
 
 =item * module File::Spec::Functions
 
@@ -542,7 +508,7 @@ Returns the path to an icon for this module (relative to the module file itself)
 
 =item * module Exporter
 
-
+=back
 
 
 =end ModInfo interface
@@ -552,6 +518,10 @@ Returns the path to an icon for this module (relative to the module file itself)
 
 ModInfo currently has problems with mfo files that define more than one module.
 
+=head1 REPOSITORY
+
+L<https://github.com/neilbowers/Devel-ModInfo>
+
 =head1 AUTHOR
 
 jtillman@bigfoot.com
@@ -559,7 +529,7 @@ tcushard@bigfoot.com
 
 =head1 SEE ALSO
 
-Devel::ModInfo::Tutorial
+L<Devel::ModInfo::Tutorial>
 
 pl2modinfo.pl
 
@@ -568,5 +538,12 @@ modinfo2xml.pl
 modinfo2html.pl
 
 perl(1).
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2002 by James Tillman E<lt>jtillman@bigfoot.comE<gt>
+
+This is free software; you can redistribute it and/or modify it under
+the terms of the Artistic License 1.0.
 
 =cut

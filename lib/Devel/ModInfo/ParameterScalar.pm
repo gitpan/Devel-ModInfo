@@ -10,18 +10,18 @@ package Devel::ModInfo::ParameterScalar;
 
 # MODINFO dependency module strict
 use strict;
-# MODINFO dependency module vars
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
+# MODINFO dependency module warnings
+use warnings;
 
 # MODINFO dependency module Exporter
 require Exporter;
 
 # MODINFO parent_class Devel::ModInfo::Parameter
-@ISA = qw(Exporter AutoLoader Devel::ModInfo::Parameter);
-@EXPORT = qw();
-# MODINFO version 0.01
+our @ISA    = qw(Exporter Devel::ModInfo::Parameter);
+our @EXPORT = qw();
 
-($VERSION) = ' $Revision: 1.3 $ ' =~ /\$Revision:\s+([^\s]+)/;
+# MODINFO version 0.06
+our $VERSION = '0.06';
 
 
 # Preloaded methods go here.

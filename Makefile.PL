@@ -1,4 +1,12 @@
 use ExtUtils::MakeMaker;
+
+my $mm_ver = $ExtUtils::MakeMaker::VERSION;
+if ($mm_ver =~ /_/) {
+    # developer release
+    $mm_ver = eval $mm_ver;
+    die $@ if $@;
+}
+
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 WriteMakefile(
@@ -6,20 +14,66 @@ WriteMakefile(
     'ABSTRACT'	      => 'Perl extension for providing metadata about a module\'s methods, properties, and arguments',
     'BINARY_LOCATION' => 'x86/Devel-ModInfo.tar.gz',
     'NAME'            => 'Devel::ModInfo',
-    'VERSION_FROM'    => 'ModInfo.pm', # finds $VERSION
+    'VERSION_FROM'    => 'lib/Devel/ModInfo.pm',
     'PL_FILES'        => {
 	'pl2modinfo.PL'     => 'pl2modinfo',
 	'modinfo2html.PL'   => 'modinfo2html',
 	'modinfo2embpod.PL' => 'modinfo2embpod',
 	'modinfo2xml.PL'    => 'modinfo2xml',
     },
-    'EXE_FILES'	      => ['pl2modinfo', 'modinfo2html', 'modinfo2embpod', 'modinfo2xml', 'modinfo2embpod.tt', 'modinfo2html.tt', 'modinfo2html_idx.tt'],
-    'clean'       => { FILES => '$(EXE_FILES)' },
+    'EXE_FILES'	      => ['pl2modinfo', 'modinfo2html', 'modinfo2embpod', 'modinfo2xml'],
+    'clean'       => { FILES => '$(EXE_FILES) ex/*.test' },
+
+    ($mm_ver >= 6.31
+        ? (LICENSE => 'artistic_1')
+        : ()
+    ),
+
     PREREQ_PM   => {
-        'XML::DOM'          => '0',
-	'Template' => '0',
-	'Parse::RecDescent' => '0',
+        'Data::Dumper'          => 0,
+        'IO::File'              => 0,
+        'XML::DOM'              => 0,
+        'Template'              => 0,
+        'Parse::RecDescent'     => 0,
+        'File::Spec::Functions' => 0,
+        'strict'                => 0,
+        'warnings'              => 0,
+        'Exporter'              => 0,
     },
+
+    ($mm_ver >= 6.52
+        ? (CONFIGURE_REQUIRES => {
+                'ExtUtils::MakeMaker' => 6.30,
+          })
+        : ()
+    ),
+
+    ($mm_ver >= 6.64
+        ? (TEST_REQUIRES => {
+                'Cwd' => 0,
+          })
+        : ()
+    ),
+
+    ($mm_ver >= 6.48
+        ? (MIN_PERL_VERSION => 5.006)
+        : ()
+    ),
+
+    ($mm_ver <= 6.45
+        ? ()
+        : (META_MERGE => {
+            'meta-spec' => { version => 2 },
+            resources => {
+                repository  => {
+                    type => 'git',
+                    web  => 'https://github.com/neilbowers/Devel-ModInfo',
+                    url  => 'git://github.com/neilbowers/Devel-ModInfo.git',
+                },
+            },
+          })
+    ),
+
 );
 
 sub MY::postamble {

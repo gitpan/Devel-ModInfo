@@ -10,8 +10,8 @@ package Devel::ModInfo::Method;
 
 # MODINFO dependency module strict
 use strict;
-# MODINFO dependency module vars
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
+# MODINFO dependency module warnings
+use warnings;
 
 # MODINFO dependency module Devel::ModInfo::Function
 require Devel::ModInfo::Function;
@@ -19,10 +19,11 @@ require Devel::ModInfo::Function;
 require Exporter;
 
 # MODINFO parent_class Devel::ModInfo::Function
-@ISA = qw(Exporter AutoLoader Devel::ModInfo::Function);
-@EXPORT = qw();
-# MODINFO version 0.01
-($VERSION) = ' $Revision: 1.3 $ ' =~ /\$Revision:\s+([^\s]+)/;
+our @ISA    = qw(Exporter Devel::ModInfo::Function);
+our @EXPORT = qw();
+
+# MODINFO version 0.06
+our $VERSION = '0.06';
 
 
 # Preloaded methods go here.

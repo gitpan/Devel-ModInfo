@@ -9,13 +9,13 @@
 package Devel::ModInfo::DataType;
 
 use strict;
-use vars qw/ @ISA @EXPORT_OK $VERSION /;
+use warnings;
 
 # MODINFO parent_class Exporter
-@ISA = ('Exporter');
-@EXPORT_OK = qw( String2DataType );
+our @ISA = ('Exporter');
+our @EXPORT_OK = qw( String2DataType );
 
-($VERSION) = ' $Revision: 1.3 $ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION = '0.06';
 
 # MODINFO function SCALAR
 # MODINFO retval STRING

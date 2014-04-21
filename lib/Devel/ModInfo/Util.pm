@@ -10,6 +10,8 @@ package Devel::ModInfo::Util;
 
 # MODINFO dependency module strict
 use strict;
+# MODINFO dependency module warnings
+use warnings;
 
 # MODINFO dependency module IO::File
 use IO::File;
@@ -19,17 +21,16 @@ use Parse::RecDescent;
 use XML::DOM;
 # MODINFO dependency module Data::Dumper
 use Data::Dumper;
-# MODINFO dependency module vars
-use vars qw/ @ISA @EXPORT_OK $VERSION /;
 
 # MODINFO dependency module Exporter
 require Exporter;
-# MODINFO parent_class Exporter
-@ISA = qw/ Exporter /;
-@EXPORT_OK = qw/ parse_modinfo_file parse_modinfo_multiline parse_modinfo_line 
-	convert_modinfo_to_xml /;
 
-($VERSION) = ' $Revision: 1.4 $ ' =~ /\$Revision:\s+([^\s]+)/;
+# MODINFO parent_class Exporter
+our @ISA       = qw/ Exporter /;
+our @EXPORT_OK = qw/ parse_modinfo_file parse_modinfo_multiline
+                     parse_modinfo_line convert_modinfo_to_xml /;
+
+our $VERSION = '0.06';
 
 my $error;
 my $parser = new Parse::RecDescent(grammar());

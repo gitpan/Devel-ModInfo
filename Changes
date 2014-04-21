@@ -1,15 +1,26 @@
-Revision history for Perl extension ModInfo.
+Revision history for Perl module Devel::ModInfo
 
-0.02  
-	+ Added README
-	+ Added COPYING (Artistic License)
-	+ Added License Statement to all code files
-	+ Changed versioning convention on all code files
-	+ Added modinfo2embpod.PL to the MANIFEST
+0.06 2014-04-21 NEILB
+    - Fixed abstract in pod to follow convention
+    - Moved all modules into lib/Devel/
+    - Added "use warnings" to all modules.
+    - Added consistent $VERSION to all modules.
+    - All prereqs in PREREQ_PM, and added CONFIGURE_REQUIRES and TEST_REQUIRES
+    - Reformatted Changes as per CPAN::Changes::Spec
+    - Fixed pod errors
+    - Added github repo to metadata and pod
+    - Tweaked things so 'make clean' will remove the right things
+    - Specified license type as 'artistic_1' in doc and metadata
+    - pod and code no longer use indirect method call notation
+    - Min perl version set to 5.6.0
 
-0.01  Mon May 21 12:15:25 2001
-	- original version; created by h2xs 1.19
+0.05 2002-08-18 JTILLMAN
+    - Added README
+    - Added COPYING (Artistic License)
+    - Added License Statement to all code files
+    - Changed versioning convention on all code files
+    - Added modinfo2embpod.PL to the MANIFEST
 
-0.01  Wed Aug 08 12:05:00 2001
-	+ Added modinfo2embpod.tt
-	+ Added modinfo2embpod.PL
+0.01 2002-08-17 JTILLMAN
+    - original version; created by h2xs 1.19
+

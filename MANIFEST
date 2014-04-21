@@ -3,24 +3,24 @@ Makefile.PL
 MANIFEST
 COPYING
 README
-ModInfo.pm
-ModInfo/DataType.pm
-ModInfo/Dependency.pm
-ModInfo/Feature.pm
-ModInfo/Function.pm
-ModInfo/Method.pm
-ModInfo/Module.pm
-ModInfo/ParamArray.pm
-ModInfo/Constructor.pm
-ModInfo/Parameter.pm
-ModInfo/ParameterScalar.pm
-ModInfo/ParamHash.pm
-ModInfo/ParamHashRef.pm
-ModInfo/ParamHash/Key.pm
-ModInfo/ParentClass.pm
-ModInfo/Property.pm
-ModInfo/Tutorial.pod
-ModInfo/Util.pm
+lib/Devel/ModInfo.pm
+lib/Devel/ModInfo/DataType.pm
+lib/Devel/ModInfo/Dependency.pm
+lib/Devel/ModInfo/Feature.pm
+lib/Devel/ModInfo/Function.pm
+lib/Devel/ModInfo/Method.pm
+lib/Devel/ModInfo/Module.pm
+lib/Devel/ModInfo/ParamArray.pm
+lib/Devel/ModInfo/Constructor.pm
+lib/Devel/ModInfo/Parameter.pm
+lib/Devel/ModInfo/ParameterScalar.pm
+lib/Devel/ModInfo/ParamHash.pm
+lib/Devel/ModInfo/ParamHashRef.pm
+lib/Devel/ModInfo/ParamHash/Key.pm
+lib/Devel/ModInfo/ParentClass.pm
+lib/Devel/ModInfo/Property.pm
+lib/Devel/ModInfo/Tutorial.pod
+lib/Devel/ModInfo/Util.pm
 pl2modinfo.PL
 modinfo2embpod.PL
 modinfo2xml.PL
@@ -35,3 +35,5 @@ ex/MyModule.pm
 ex/MyModule.commented
 ex/MyModule.mfo
 
+META.yml                                 Module YAML meta-data (added by MakeMaker)
+META.json                                Module JSON meta-data (added by MakeMaker)
