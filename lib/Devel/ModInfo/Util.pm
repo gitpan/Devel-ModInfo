@@ -30,7 +30,7 @@ our @ISA       = qw/ Exporter /;
 our @EXPORT_OK = qw/ parse_modinfo_file parse_modinfo_multiline
                      parse_modinfo_line convert_modinfo_to_xml /;
 
-our $VERSION = '2.01';
+our $VERSION = '2.02';
 
 my $error;
 my $parser = new Parse::RecDescent(grammar());

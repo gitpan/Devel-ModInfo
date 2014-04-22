@@ -1,5 +1,10 @@
 Revision history for Perl module Devel::ModInfo
 
+2.02 2014-04-22 NEILB
+    - The .PL scripts were all setting the #! path to Config{startperl},
+      which I think was causing a lot of failures due to Parse::RecDescent
+      not being found.
+
 2.01 2014-04-21 NEILB
     - Needed to install a new version of Pod::Checker to find the pod error
       that MetaCPAN was griping about :-(
