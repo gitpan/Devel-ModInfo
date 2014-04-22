@@ -20,8 +20,8 @@ require Exporter;
 our @ISA    = qw(Exporter Devel::ModInfo::Feature);
 our @EXPORT = qw();
 
-# MODINFO version 2.02
-our $VERSION = '2.02';
+# MODINFO version 2.03
+our $VERSION = '2.03';
 
 # Preloaded methods go here.
 # MODINFO constructor new

@@ -1,6 +1,9 @@
 Revision history for Perl module Devel::ModInfo
 
 2.02 2014-04-22 NEILB
+    - Still lots of fails, try using $^X in the #! path...
+
+2.02 2014-04-22 NEILB
     - The .PL scripts were all setting the #! path to Config{startperl},
       which I think was causing a lot of failures due to Parse::RecDescent
       not being found.

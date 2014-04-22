@@ -10,7 +10,7 @@ chmod(0755, $file);
 print "Extracting $file (with variable substitutions)\n";
 
 print OUT <<"!GROK!THIS!";
-#!/usr/bin/env perl -w
+#!$^X -w
 
 !GROK!THIS!
 
