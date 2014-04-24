@@ -14,6 +14,10 @@ print OUT <<"!GROK!THIS!";
 
 !GROK!THIS!
 
+foreach my $dir (@INC) {
+    print OUT qq{use lib '$dir';\n};
+}
+
 print OUT <<'!NO!SUBS!';
 
 use strict;

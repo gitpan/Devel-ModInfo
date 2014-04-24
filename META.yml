@@ -33,4 +33,4 @@ requires:
   warnings: 0
 resources:
   repository: git://github.com/neilbowers/Devel-ModInfo.git
-version: 2.03
+version: 2.04

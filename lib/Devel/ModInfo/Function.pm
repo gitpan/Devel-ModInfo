@@ -21,8 +21,8 @@ require Devel::ModInfo::Feature;
 our @ISA    = qw(Exporter Devel::ModInfo::Feature);
 our @EXPORT = qw();
 
-# MODINFO version 2.03
-our $VERSION = '2.03';
+# MODINFO version 2.04
+our $VERSION = '2.04';
 
 
 # Preloaded methods go here.
