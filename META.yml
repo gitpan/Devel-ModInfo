@@ -1,36 +1,27 @@
 ---
-abstract: "Perl extension for providing metadata about a module's methods, properties, and arguments"
+abstract: 'show module information automatically'
 author:
-  - 'James Tillman <jtillman@bigfoot.com>'
+  - 'Dai Okabayashi <bayashi@cpan.org>'
 build_requires:
-  Cwd: 0
-  ExtUtils::MakeMaker: 0
+  Capture::Tiny: 0
+  Test::More: 0.88
 configure_requires:
-  ExtUtils::MakeMaker: 6.3
+  Module::Build: 0.38
 dynamic_config: 1
-generated_by: 'ExtUtils::MakeMaker version 6.94, CPAN::Meta::Converter version 2.133380'
-license: artistic
+generated_by: 'Module::Build version 0.4005, CPAN::Meta::Converter version 2.132830'
+license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4
 name: Devel-ModInfo
-no_index:
-  directory:
-    - t
-    - inc
-  package:
-    - MyModule
+provides:
+  Devel::ModInfo:
+    file: lib/Devel/ModInfo.pm
+    version: 0.01
 requires:
-  Data::Dumper: 0
-  Exporter: 0
-  File::Spec::Functions: 0
-  IO::File: 0
-  Parse::RecDescent: 0
-  Template: 0
-  XML::DOM: 0
-  perl: 5.006
-  strict: 0
-  warnings: 0
+  perl: 5.008001
 resources:
-  repository: git://github.com/neilbowers/Devel-ModInfo.git
-version: 2.04
+  bugtracker: http://github.com/bayashi/Devel-ModInfo/issues
+  license: http://dev.perl.org/licenses/
+  repository: http://github.com/bayashi/Devel-ModInfo
+version: 0.01

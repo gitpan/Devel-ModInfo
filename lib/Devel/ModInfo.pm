@@ -1,549 +1,237 @@
-# This code is a part of ModInfo, and is released under the Perl Artistic 
-#  License.
-# Copyright 2002 by James Tillman and Todd Cushard. See README and COPYING
-# for more information, or see 
-#  http://www.perl.com/pub/a/language/misc/Artistic.html.
-# $Id: ModInfo.pm,v 1.6 2002/08/17 23:23:46 jtillman Exp $
-
-#TODO
-#check that RETVAL is getting processed when doing reading in XML for functions
-#
-
-$| = 1;
-
-# MODINFO module Devel::ModInfo
 package Devel::ModInfo;
-
-use 5.006;
-# MODINFO dependency module File::Spec::Functions
-use File::Spec::Functions;
-# MODINFO dependency module XML::DOM
-use XML::DOM;
-# MODINFO dependency module Data::Dumper
-use Data::Dumper;
-
-# MODINFO dependency module strict
 use strict;
-# MODINFO dependency module warnings
 use warnings;
 
-# MODINFO dependency module Devel::ModInfo::Method
-use Devel::ModInfo::Method;
-# MODINFO dependency module Devel::ModInfo::Constructor
-use Devel::ModInfo::Constructor;
-# MODINFO dependency module Devel::ModInfo::Parameter
-use Devel::ModInfo::Parameter;
-# MODINFO dependency module Devel::ModInfo::Function
-use Devel::ModInfo::Function;
-# MODINFO dependency module Devel::ModInfo::Property
-use Devel::ModInfo::Property;
-# MODINFO dependency module Devel::ModInfo::Module
-use Devel::ModInfo::Module;
-# MODINFO dependency module Devel::ModInfo::Dependency
-use Devel::ModInfo::Dependency;
-# MODINFO dependency module Devel::ModInfo::ParentClass
-use Devel::ModInfo::ParentClass;
-# MODINFO dependency module Devel::ModInfo::ParamHash::Key
-use Devel::ModInfo::ParamHash::Key;
-# MODINFO dependency module Devel::ModInfo::ParamHash
-use Devel::ModInfo::ParamHash;
-# MODINFO dependency module Devel::ModInfo::ParamHash
-use Devel::ModInfo::ParamHashRef;
-# MODINFO dependency module Devel::ModInfo::ParamArray
-use Devel::ModInfo::ParamArray;
-# MODINFO dependency module Devel::ModInfo::DataType
-use Devel::ModInfo::DataType 'String2DataType';
-
-# MODINFO dependency module Exporter
-require Exporter;
-
-# MODINFO parent_class AutoLoader
-our @ISA    = qw(Exporter AutoLoader);
-our @EXPORT = qw();
-
-# MODINFO version 2.04
-our $VERSION = '2.04';
-
-
-# Preloaded methods go here.
-# MODINFO constructor new
-# MODINFO param module STRING Package name of the module to get info for
-sub new{
-	my ($class, $module) = @_;
-
-	#
-	#Translate module and find ModInfo metadata file
-	#
-	my $mod_info_file = $module;
-	$mod_info_file =~ s|::|/|g;
-	$mod_info_file .= ".mfo";
-	$mod_info_file = canonpath(_findINC($mod_info_file));
-	if ($mod_info_file eq '') {
-		die "Couldn't locate mfo file for $module in @INC path";
-	}
-	my $parser = XML::DOM::Parser->new();
-	my $xml_doc;
-	eval {
-	    $xml_doc = $parser->parsefile($mod_info_file);
-	};
-        if ($@) {
-	    warn "Error parsing mfo file $mod_info_file: $@";
-	    return undef;
-	}
-	my(@methods, @constructors, @functions, @properties);
-
-
-	#
-	#Get methods
-	#
-	foreach my $item ($xml_doc->getElementsByTagName('method')) {		
-		my $item_obj = Devel::ModInfo::Method->new(
-                           _extract_function_data($item, $class)
-                       );
-		push(@methods, $item_obj);
-	}
-
-	#
-	#Get constructors
-	#
-	foreach my $item ($xml_doc->getElementsByTagName('constructor')) {		
-		my $item_obj = Devel::ModInfo::Constructor->new(_extract_function_data($item, $class));
-		push(@constructors, $item_obj);
-	}
-
-	#
-	#Get functions
-	#
-	foreach my $item ($xml_doc->getElementsByTagName('function')) {		
-		my $item_obj = Devel::ModInfo::Function->new(_extract_function_data($item, $class));
-		push(@functions, $item_obj);
-	}
-
-	#
-	#Get properties
-	#
-	foreach my $item ($xml_doc->getElementsByTagName('property')) {		
-		my $item_obj = Devel::ModInfo::Property->new(
-			name 				=> $item->getAttribute('name'),
-			display_name 		=> $item->getAttribute('display_name'),
-			short_description	=> $item->getAttribute('short_description'),
-			read_method			=> $item->getAttribute('read_method'),
-			write_method		=> $item->getAttribute('write_method'),
-			data_type			=> _get_datatype(class_name=>$class, data_type=>$item->getAttribute('data_type')),
-		);
-		push(@properties, $item_obj);
-	}
-	
-
-	#
-	# Get module-level info
-	#
-	my $mod_node = $xml_doc->getElementsByTagName('module')->[0];
-
-	return undef if !$mod_node;
-
-	my @deps;
-	foreach my $dep_node ($mod_node->getElementsByTagName('dependency')) {
-		my $dep_obj = Devel::ModInfo::Dependency->new(
-			type 	=> $dep_node->getAttribute('type'),
-			target 	=> $dep_node->getAttribute('target'),
-		);
-		push(@deps, $dep_obj);
-	}
-
-	my @parents;
-	foreach my $parent ($mod_node->getElementsByTagName('parent_class')) {
-		my $parent_obj = Devel::ModInfo::ParentClass->new(
-			name 	=> $parent->getAttribute('name'),
-		);
-		push(@parents, $parent_obj);
-	}
-
-
-	my $mod_obj = Devel::ModInfo::Module->new(
-		name 				=> $mod_node->getAttribute('name'),
-		display_name 		=> $mod_node->getAttribute('display_name'),
-		short_description	=> $mod_node->getAttribute('short_description'),
-		version				=> $mod_node->getAttribute('version'),
-		class 				=> $module,
-		dependencies		=> \@deps,
-		parent_classes		=> \@parents,
-	);
-	
-	#
-	# Assign collections and other attributes to $self
-	#
-	my $self = {
-		module_name		=> $module,
-		mod_info_file	=> $mod_info_file,
-		methods 		=> \@methods,
-		constructors	=> \@constructors,
-		functions 		=> \@functions,
-		properties		=> \@properties,
-		module 			=> $mod_obj,
-	};
-
-	#print Dumper $self;
-	
-	#
-	# Return object
-	#
-	return bless $self => $class;
+our %seen;
+BEGIN {
+    %seen = %INC;
 }
 
-# MODINFO function properties
-# MODINFO retval ARRAYREF
-sub properties{$_[0]->{properties}}
+our $VERSION = '0.01';
 
-# MODINFO function methods
-# MODINFO retval ARRAYREF
-sub methods{$_[0]->{methods}}
+sub DB::DB {}
 
-# MODINFO function functions
-# MODINFO retval ARRAYREF
-sub functions{$_[0]->{functions}}
-
-# MODINFO function constructors
-# MODINFO retval ARRAYREF
-sub constructors{$_[0]->{constructors}}
-
-# MODINFO function module Returns the Module object for this Package
-# MODINFO retval Devel::ModInfo::Module
-sub module{$_[0]->{module}}
-
-# MODINFO function is_oo Returns 1 if this is an object-oriented package, 0 if not
-# MODINFO retval INTEGER
-sub is_oo{
-	my($self) = @_;
-	if ($self->constructors) {return 1}
-	else {return 0}
+our %pragmas;
+for my $pragma (qw/
+    charnames  constant
+    diagnostics
+    encoding
+    feature  fields  filetest
+    if  integer
+    less  lib  locale
+    mro
+    open  ops  overload  overloading
+    parent
+    re
+    sigtrap  sort  strict  subs
+    threads  threads::shared
+    utf8
+    vars  vmsish
+    warnings  warnings::register
+/) {
+    $pragmas{$pragma} = 1;
 }
 
-# MODINFO function icon Returns the path to an icon for this module (relative to the module file itself)
-# MODINFO retval STRING
-sub icon{$_[0]->{icon}}
-
-sub _findINC {
-	my $file = join('/',@_);
-	my $dir;
-	$file  =~ s,::,/,g;
-	foreach $dir (@INC) {
-		my $path;
-		return $path if (-e ($path = "$dir/$file"));
-	}
-	return undef;
+our %skips;
+for my $class (qw/
+    AutoLoader
+    Benchmark
+    base
+    bytes
+    Config
+    DynaLoader
+    XSLoader
+/) {
+    $skips{$class} = 1;
 }
 
-#sub _check_module_version {
-#	my($version, $module) = @_;
-#	my $module_file = $module . ".pm";
-#	$module_file =~ s/::/\//g;
-#	open(MOD, _findINC($module_file)) or warn "Couldn't open $module_file for verification of version: $!";
-#	while(my $line = <MOD>) {
-#		if($line =~ /^package\s+(.);/ && $1 eq $module)
-#	}
-#	
-#	print "Version for $module is: $module_version\n";
-#	return $module_version;	
-#
-#}
+my $ALL = $ENV{MODINFO_SHOW_ALL};
 
-sub _extract_function_data {
-	my($function_node, $class) = @_;
-	#my $function_node = $params{function_node};
-	
-	my $name = $function_node->getAttribute('name');
-	my $display_name = $function_node->getAttribute('display_name');
-	my $short_description = $function_node->getAttribute('short_description');
-	my @ret_val = $function_node->getElementsByTagName('retval');
-	my $data_type;
-	if (@ret_val) {
-		$data_type = $ret_val[0]->getAttribute('data_type');
-	}
-	else {
-		$data_type = String2DataType('VOID');
-	}
+our $SHOWN = 0;
 
-	# Get parameters
-	my @params;
-	foreach my $param ($function_node->getElementsByTagName('param')) {
-		my $name = $param->getAttribute('name');
-		my $data_type = _get_datatype(class_name=>$class, data_type=>$param->getAttribute('data_type'));
-		my $short_description = $param->getAttribute('short_description');
-		my $display_name = $param->getAttribute('display_name');
-		
-		my $param_obj = Devel::ModInfo::Parameter->new(
-			name				=> $name,
-			display_name		=> $display_name,
-			data_type			=> $data_type,
-			short_description	=> $short_description,
-		);
-		
-		push(@params, $param_obj);
-	}
+sub show {
+    my $result = '';
 
-	#
-	# Check for paramhash(ref) at end of param list.  Paramhashes must be
-	#  last item in parameter list, anyway
-	#
-	my(@keys);
-	my $param_hash;
-	if ($param_hash = $function_node->getElementsByTagName('paramhash')->[0] or 
-	      $param_hash = $function_node->getElementsByTagName('paramhashref')->[0]) {
-		my $name = $param_hash->getAttribute('name');
-		my $data_type = $param_hash->getAttribute('data_type');
-		my $short_description = $param_hash->getAttribute('short_description');
-		my $display_name = $param_hash->getAttribute('display_name');
-		
-		foreach my $key ($param_hash->getElementsByTagName('key')) {
-			my $name = $key->getAttribute('name');
-			my $data_type = _get_datatype(class_name=>$class, data_type=>$key->getAttribute('data_type'));
-			my $short_description = $key->getAttribute('short_description');
-			my $display_name = $key->getAttribute('display_name');
-			my $key_obj = Devel::ModInfo::ParamHash::Key->new(
-				name				=> $name,
-				display_name		=> $display_name,
-				data_type			=> $data_type,
-				short_description	=> $short_description,
-			);
-			
-			push(@keys, $key_obj);
-		}
-		my $param_hash_obj;
-		if ($data_type eq 'paramhash') {
-		    $param_hash_obj = Devel::ModInfo::ParamHash->new(
-			name				=> $name,
-			display_name		=> $display_name,
-			data_type			=> $data_type,
-			short_description	=> $short_description,
-			keys				=> \@keys,
-		       );	
-		}
-		else {
-		    $param_hash_obj = Devel::ModInfo::ParamHashRef->new(
-			name				=> $name,
-			display_name		=> $display_name,
-			data_type			=> $data_type,
-			short_description	=> $short_description,
-			keys				=> \@keys,
-		       );	
-		}
-		
-		push(@params, $param_hash_obj);
-	}
+    return $result if $SHOWN;
 
-	#
-	# Check for paramarray at end of parameter list.  Paramarrays must be
-	#  last item in parameter list, anyway
-	#
-	if (my $param_array = $function_node->getElementsByTagName('paramarray')->[0]) {
-		my $name = $param_array->getAttribute('name');
-		my $data_type = _get_datatype(class_name=>$class, data_type=>$param_array->getAttribute('data_type'));
-		my $short_description = $param_array->getAttribute('short_description');
-		my $display_name = $param_array->getAttribute('display_name');
-		
-		my $param_array_obj = Devel::ModInfo::ParamArray->new(
-			name				=> $name,
-			display_name		=> $display_name,
-			data_type			=> $data_type,
-			short_description	=> $short_description,
-			keys				=> \@keys,
-		);			
-		
-		push(@params, $param_array_obj);
+    my $modules = _get_module_information();
 
-	}
+    $result .= "Perl\t$]\n";
 
-	my %data = (
-		name				=> $name,
-		display_name		=> $display_name,
-		short_description	=> $short_description,
-		data_type			=> $data_type,
-		parameters 			=> \@params,
-	);
+    for my $module (sort { uc($a) cmp uc($b) } keys %{$modules}) {
+        $result .= sprintf "%s\t%s\n", $module, $modules->{$module}->{version};
+    }
 
-	return %data;
+    $SHOWN = 1;
+
+    return $result;
 }
 
-sub _get_datatype {
-	my(%params) = @_;
-	#print "Converting $params{data_type}\n";
-	my $data_type = String2DataType($params{'data_type'});
-	if (!$data_type) {
-		my $file_path = $params{'class_name'};
-		$file_path =~ s|::|/|g;
-		$file_path = _findINC("$file_path.pm");
-		if (-f $file_path) {
-			$data_type = $params{'data_type'};
-		}
-		else {
-			warn "Could not resolve data type " . $params{'data_type'} . " while processing " . $params{'class_name'} . "\n";
-		}
-	}	
-	
-	return $data_type;
-};
+sub _get_module_information {
+    my %modules;
+    for my $module_path (keys %INC) {
+        my $class = _path2class($module_path);
+        unless ($ALL) {
+            next if $seen{$module_path}
+                        || $module_path !~ m!\.pm$!
+                        || $pragmas{$class}
+                        || $skips{$class}
+                        || $class eq __PACKAGE__;
+        }
+        $modules{$class} = {
+            version => _get_version($class),
+        };
+    }
+    return \%modules;
+}
+
+sub _path2class {
+    my $path = shift;
+
+    my $class = $path;
+    $class =~ s!/!::!g;
+    $class =~ s!\.pm$!!;
+
+    return $class;
+}
+
+sub _get_version {
+    my $module = shift;
+
+    my $version = eval {
+        my $v = $module->VERSION;
+        unless (defined $v) {
+            $v = ${"${module}::VERSION"};
+        }
+        $v;
+    };
+    if ($@ || !defined $version) {
+        $version = 'none';
+    }
+
+    return $version;
+}
+
+
+END {
+    my $info = show();
+    print $info;
+}
 
 1;
+
 __END__
 
 =head1 NAME
 
-Devel::ModInfo - provides metadata about a module's methods, properties, and arguments
+Devel::ModInfo - show module information automatically
+
 
 =head1 SYNOPSIS
 
-  use ModInfo;
-  my $mi        = Devel::ModInfo->new('Data::Dumper');
-  my @functions = $mi->function_descriptors();
-  my (@methods, @properties);
-  if ($mi->is_oo) {
-	  @methods    = $mi->method_descriptors;
-      @properties = $mi->property_descriptors();
-  }
+    $ perl -d:ModInfo -MData::Dumper -e 'print "foo!\n"'
+    foo!
+    Perl    5.012002
+    Carp    1.17
+    Data::Dumper    2.125
+    Exporter        5.64_01
+
 
 =head1 DESCRIPTION
 
-Devel::ModInfo will use a previously created XML file
-(with the extension .mfo) to generate 
-a data structure that describes the interface for a Perl module.
+Devel::ModInfo shows the module information at the end of your script.
 
-The Devel::ModInfo system is made up of several object-oriented modules
-which are all used exclusively by the ModInfo module.
-This means that the developer should only ever 
-need to directly instantiate the Devel::ModInfo
-object with the class name of the desired module.
+This module is especially useful for a L<Benchmark> report.
 
-=head1 INTERFACE
+For example, here is the benchmark script.
 
-=begin ModInfo
+    # crypt_benchmark.pl
+    
+    use strict;
+    use warnings;
 
-=head2 Parent Classes
+    use Benchmarks sub {
 
-=over 4
+        use Digest::HMAC_SHA1 qw(hmac_sha1_hex);
+        use Digest::HMAC_MD5 qw(hmac_md5_hex);
 
-=item * AutoLoader
+        my $STR = '@test123';
+        my $KEY = 'ABC';
 
-=back
+        {
+            'hmac_sha1' => sub { hmac_sha1_hex($STR, $KEY); },
+            'hmac_md5'  => sub { hmac_md5_hex($STR, $KEY); },
+            'crypt'     => sub { crypt($STR, $KEY); },
+        };
+    };
 
+To invoke with C<Devel::ModInfo>.
 
-=head2 Constructors
+    $ perl -d:ModInfo crypt_benchmark.pl
+    
+    Benchmark: running crypt, hmac_md5, hmac_sha1 for at least 1 CPU seconds...
+         crypt:  1 wallclock secs ( 1.06 usr +  0.00 sys =  1.06 CPU) @ 108196.23/s (n=114688)
+      hmac_md5:  1 wallclock secs ( 1.10 usr +  0.00 sys =  1.10 CPU) @ 195490.00/s (n=215039)
+     hmac_sha1:  1 wallclock secs ( 1.03 usr +  0.00 sys =  1.03 CPU) @ 111346.60/s (n=114687)
+                  Rate     crypt hmac_sha1  hmac_md5
+    crypt     108196/s        --       -3%      -45%
+    hmac_sha1 111347/s        3%        --      -43%
+    hmac_md5  195490/s       81%       76%        --
+    
+    Perl    5.012002
+    Benchmarks      0.05
+    Carp    1.17
+    Digest::base    1.16
+    Digest::HMAC    1.03
+    Digest::HMAC_MD5        1.01
+    Digest::HMAC_SHA1       1.03
+    Digest::MD5     2.39
+    Digest::SHA     5.47
+    Exporter        5.64_01
+    Exporter::Heavy 5.64_01
+    MIME::Base64    3.08
+    Time::HiRes     1.9719
 
-=over 4
-
-=item * sub new returns [VOID]
-
-=item *	module as STRING
-
-=back
-
-
-=head2 Functions
-
-=over 4
-
-=item * sub properties returns [ARRAYREF]
-
-=item * sub methods returns [ARRAYREF]
-
-=item * sub functions returns [ARRAYREF]
-
-=item * sub constructors returns [ARRAYREF]
-
-=item * sub module returns [Devel::ModInfo::Module]
-
-Returns the Module object for this Package
-
-=item * sub is_oo returns [INTEGER]
-
-Returns 1 if this is an object-oriented package, 0 if not
-
-=item * sub icon returns [STRING]
-
-Returns the path to an icon for this module (relative to the module file itself)
-
-=back
+All you need to do is add C<-d:ModInfo>.
 
 
+=head1 ENVIRONMENT VARIABLE
 
+=over
 
+=item MODINFO_SHOW_ALL
 
-=head2 Dependencies
-
-=over 4
-
-=item * module File::Spec::Functions
-
-=item * module XML::DOM
-
-=item * module Data::Dumper
-
-=item * module strict
-
-=item * module vars
-
-=item * module Devel::ModInfo::Method
-
-=item * module Devel::ModInfo::Constructor
-
-=item * module Devel::ModInfo::Parameter
-
-=item * module Devel::ModInfo::Function
-
-=item * module Devel::ModInfo::Property
-
-=item * module Devel::ModInfo::Module
-
-=item * module Devel::ModInfo::Dependency
-
-=item * module Devel::ModInfo::ParentClass
-
-=item * module Devel::ModInfo::ParamHash::Key
-
-=item * module Devel::ModInfo::ParamHash
-
-=item * module Devel::ModInfo::ParamArray
-
-=item * module Devel::ModInfo::DataType
-
-=item * module Exporter
+By default, some modules are filtered. If you set C<MODINFO_SHOW_ALL=1>, all module information will output.
 
 =back
 
 
-=end ModInfo
+=head1 METHOD
 
+=over
 
-=head1 KNOWN ISSUES
+=item show
 
-ModInfo currently has problems with mfo files that define more than one module.
+To build an information of modules. This method returns the string;
+
+=back
+
 
 =head1 REPOSITORY
 
-L<https://github.com/neilbowers/Devel-ModInfo>
+Devel::ModInfo is hosted on github: L<http://github.com/bayashi/Devel-ModInfo>
+
+Welcome your patches and issues :D
+
 
 =head1 AUTHOR
 
-jtillman@bigfoot.com
-tcushard@bigfoot.com
+Dai Okabayashi E<lt>bayashi@cpan.orgE<gt>
 
-=head1 SEE ALSO
 
-L<Devel::ModInfo::Tutorial>
+=head1 LICENSE
 
-pl2modinfo.pl
-
-modinfo2xml.pl
-
-modinfo2html.pl
-
-perl(1).
-
-=head1 COPYRIGHT AND LICENSE
-
-This software is copyright (c) 2002 by James Tillman E<lt>jtillman@bigfoot.comE<gt>
-
-This is free software; you can redistribute it and/or modify it under
-the terms of the Artistic License 1.0.
+This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself. See L<perlartistic>.
 
 =cut
