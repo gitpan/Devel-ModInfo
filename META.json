@@ -34,7 +34,7 @@
    "provides" : {
       "Devel::ModInfo" : {
          "file" : "lib/Devel/ModInfo.pm",
-         "version" : "0.01"
+         "version" : "0.02"
       }
    },
    "release_status" : "stable",
@@ -49,5 +49,5 @@
          "url" : "http://github.com/bayashi/Devel-ModInfo"
       }
    },
-   "version" : "0.01"
+   "version" : "0.02"
 }

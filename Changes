@@ -1,4 +1,8 @@
 Revision history for Perl extension Devel::ModInfo
 
+0.02    Sun Jun 15 17:34:28 JST 2014
+        - fixed the package declaration
+        - removed the unnecessary line
+
 0.01    Sun Jun 15 17:16:34 JST 2014
         - first release

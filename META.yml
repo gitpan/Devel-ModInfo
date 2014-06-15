@@ -17,11 +17,11 @@ name: Devel-ModInfo
 provides:
   Devel::ModInfo:
     file: lib/Devel/ModInfo.pm
-    version: 0.01
+    version: 0.02
 requires:
   perl: 5.008001
 resources:
   bugtracker: http://github.com/bayashi/Devel-ModInfo/issues
   license: http://dev.perl.org/licenses/
   repository: http://github.com/bayashi/Devel-ModInfo
-version: 0.01
+version: 0.02

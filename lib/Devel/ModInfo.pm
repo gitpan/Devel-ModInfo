@@ -7,9 +7,7 @@ BEGIN {
     %seen = %INC;
 }
 
-our $VERSION = '0.01';
-
-sub DB::DB {}
+our $VERSION = '0.02';
 
 our %pragmas;
 for my $pragma (qw/
@@ -112,11 +110,14 @@ sub _get_version {
     return $version;
 }
 
-
 END {
     my $info = show();
     print $info;
 }
+
+package # hide the package from the PAUSE indexer
+    DB;
+sub DB {}
 
 1;
 
